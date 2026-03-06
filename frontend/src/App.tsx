@@ -16,10 +16,12 @@ import AdminEvents from './components/admin/AdminEvents';
 import AdminUsers from './components/admin/AdminUsers';
 import AdminBookings from './components/admin/AdminBookings';
 import AdminAnalytics from './components/admin/AdminAnalytics';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
     <div className="flex flex-col min-h-screen">
+      <ScrollToTop />
       <Routes>
         {/* Admin routes (no Navbar/Footer) */}
         <Route
