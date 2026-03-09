@@ -229,12 +229,19 @@ const EventDetails = () => {
                   <p className="text-red-500 font-medium">Sold Out</p>
                 </div>
               ) : (
-                <button
-                  onClick={() => setShowBooking(true)}
-                  className="btn-primary w-full text-lg"
-                >
-                  Book Now
-                </button>
+                // Only allow booking for non-admin users
+                (user?.role !== 'admin') ? (
+                  <button
+                    onClick={() => setShowBooking(true)}
+                    className="btn-primary w-full text-lg"
+                  >
+                    Book Now
+                  </button>
+                ) : (
+                  <div className="text-center py-4 bg-surface-50 dark:bg-surface-800/50 rounded-xl">
+                    <p className="text-sm text-surface-600 dark:text-surface-400">Admins cannot book events</p>
+                  </div>
+                )
               )}
 
               <p className="text-xs text-center text-surface-500 dark:text-surface-400 mt-3">
@@ -245,8 +252,8 @@ const EventDetails = () => {
         </div>
       </div>
 
-      {/* Booking Modal */}
-      {event && (
+      {/* Booking Modal - only for non-admin users */}
+      {event && user?.role !== 'admin' && (
         <BookingModal
           event={event}
           isOpen={showBooking}

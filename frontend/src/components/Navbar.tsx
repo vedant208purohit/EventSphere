@@ -40,7 +40,7 @@ const Navbar = () => {
             <Link to="/about" className="text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">
               About Us
             </Link>
-            {user && (
+            {user && user.role !== 'admin' && (
               <Link to="/my-bookings" className="text-surface-600 dark:text-surface-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">
                 My Bookings
               </Link>
@@ -75,13 +75,15 @@ const Navbar = () => {
                       <p className="text-sm font-semibold text-surface-900 dark:text-surface-100">{user.name}</p>
                       <p className="text-xs text-surface-500">{user.email}</p>
                     </div>
-                    <Link
-                      to="/my-bookings"
-                      onClick={() => setIsProfileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-surface-600 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700/50"
-                    >
-                      <Calendar className="w-4 h-4" /> My Bookings
-                    </Link>
+                    {user.role !== 'admin' && (
+                      <Link
+                        to="/my-bookings"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-surface-600 dark:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-700/50"
+                      >
+                        <Calendar className="w-4 h-4" /> My Bookings
+                      </Link>
+                    )}
                     {user.role === 'admin' && (
                       <Link
                         to="/admin"
@@ -119,13 +121,13 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu */}
-      {isMenuOpen && (
+            {isMenuOpen && (
         <div className="md:hidden border-t border-surface-200 dark:border-surface-700 animate-slide-down">
           <div className="px-4 py-3 space-y-2">
             <Link to="/" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-lg text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800">Home</Link>
             <Link to="/events" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-lg text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800">Events</Link>
             <Link to="/about" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-lg text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800">About Us</Link>
-            {user && (
+            {user && user.role !== 'admin' && (
               <Link to="/my-bookings" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-lg text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800">My Bookings</Link>
             )}
             {!user && (
