@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { bookingService } from '../../services/bookingService';
 import { Booking, User, Event } from '../../types';
 import { Ticket, IndianRupee, X } from 'lucide-react';
@@ -7,7 +8,7 @@ import toast from 'react-hot-toast';
 const AdminBookings = () => {
   const queryClient = useQueryClient();
 
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, isError } = useQuery({
     queryKey: ['admin', 'bookings'],
     queryFn: bookingService.getAllBookings,
   });
@@ -33,22 +34,34 @@ const AdminBookings = () => {
     failed: 'badge-danger',
     refunded: 'badge-danger',
   };
+  // normalize response shape (array or { bookings: [] })
+  const allBookings: Booking[] = Array.isArray(bookings) ? bookings : (bookings && (bookings as any).bookings) ? (bookings as any).bookings : [];
+
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+  const total = allBookings.length || 0;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const pagedBookings = allBookings.slice((page - 1) * perPage, page * perPage);
 
   if (isLoading) {
     return <div className="space-y-3 animate-pulse">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="skeleton h-14 rounded-xl" />)}</div>;
+  }
+
+  if (isError) {
+    return <div className="p-6">Unable to load bookings. Please refresh or check server logs.</div>;
   }
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-black text-surface-900 dark:text-surface-50">Bookings</h1>
-        <p className="text-sm text-surface-500 mt-1">{bookings?.length || 0} total bookings</p>
+        <p className="text-sm text-surface-500 mt-1">{total} total bookings</p>
       </div>
 
       <div className="card overflow-hidden">
         {/* Mobile list */}
         <div className="md:hidden p-4 space-y-3">
-          {bookings?.map((booking: Booking) => {
+          {pagedBookings?.map((booking: Booking) => {
             const user = booking.userId as User;
             const event = booking.eventId as Event;
             return (
@@ -75,6 +88,28 @@ const AdminBookings = () => {
           })}
         </div>
 
+        {/* Pagination */}
+        <div className="p-4 flex items-center justify-between">
+          <div className="text-sm text-surface-500">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}</div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-1 rounded-lg border hover:bg-surface-100 dark:hover:bg-surface-800/20 disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <div className="text-sm">{page} / {totalPages}</div>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-3 py-1 rounded-lg border hover:bg-surface-100 dark:hover:bg-surface-800/20 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -89,7 +124,7 @@ const AdminBookings = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-100 dark:divide-surface-700">
-              {bookings?.map((booking: Booking) => {
+              {pagedBookings?.map((booking: Booking) => {
                 const user = booking.userId as User;
                 const event = booking.eventId as Event;
                 return (

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { eventService } from '../../services/eventService';
 import { Calendar, Edit, Trash2, Plus, X } from 'lucide-react';
-import { useState } from 'react';
 import { Event } from '../../types';
 import toast from 'react-hot-toast';
 
@@ -20,6 +20,14 @@ const AdminEvents = () => {
     queryKey: ['events', 'admin-all'],
     queryFn: () => eventService.getEvents({ limit: 50 }),
   });
+
+  // Pagination (client-side)
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+  const events = data?.events || [];
+  const total = events.length;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const eventsPaged = events.slice((page - 1) * perPage, page * perPage);
 
   const createMutation = useMutation({
     mutationFn: (data: Partial<Event>) => eventService.createEvent(data),
@@ -106,11 +114,33 @@ const AdminEvents = () => {
         </button>
       </div>
 
+      {/* Pagination (top) */}
+      <div className="mb-4 p-2 flex items-center justify-between">
+        <div className="text-sm text-surface-500">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}</div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-3 py-1 rounded-lg border hover:bg-surface-100 dark:hover:bg-surface-800/20 disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <div className="text-sm">{page} / {totalPages}</div>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-3 py-1 rounded-lg border hover:bg-surface-100 dark:hover:bg-surface-800/20 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
       {/* Table */}
       <div className="card overflow-hidden">
         {/* Mobile list */}
         <div className="md:hidden p-4 space-y-3">
-          {data?.events.map((event) => (
+          {eventsPaged.map((event) => (
             <div key={event._id} className="p-3 bg-surface-50 dark:bg-surface-800/40 rounded-xl flex items-start justify-between">
               <div className="flex items-start gap-3">
                 <img src={event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=100'} alt="" className="w-12 h-12 rounded-lg object-cover" />
@@ -147,7 +177,7 @@ const AdminEvents = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-100 dark:divide-surface-700">
-              {data?.events.map((event) => (
+              {eventsPaged.map((event) => (
                 <tr key={event._id} className="hover:bg-surface-50 dark:hover:bg-surface-800/30 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
@@ -178,6 +208,8 @@ const AdminEvents = () => {
           </table>
         </div>
       </div>
+
+      {/* pagination handled at top */}
 
       {/* Create/Edit Modal */}
       {showModal && (
