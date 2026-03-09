@@ -1,5 +1,6 @@
 import { X, Minus, Plus, Ticket } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { enableScrollToClose, disableScrollToClose } from '../utils/overlayManager';
 import { Event } from '../types';
 
 interface BookingModalProps {
@@ -13,7 +14,42 @@ interface BookingModalProps {
 const BookingModal = ({ event, isOpen, onClose, onBook, isLoading }: BookingModalProps) => {
   const [tickets, setTickets] = useState(1);
 
+  useEffect(() => {
+    if (isOpen) {
+      // close other overlays and lock scroll
+      if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('close-all-overlays', { detail: { except: 'bookingModal' } }));
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      enableScrollToClose();
+    } else {
+      disableScrollToClose();
+    }
+
+    return () => {
+      if (isOpen) disableScrollToClose();
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    function handler(e: Event) {
+      const ce = e as CustomEvent;
+      const except = ce?.detail?.except;
+      if (except !== 'bookingModal') {
+        // another overlay opened; close this modal
+        if (isOpen) onClose();
+      }
+    }
+
+    window.addEventListener('close-all-overlays', handler as EventListener);
+    return () => window.removeEventListener('close-all-overlays', handler as EventListener);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
 
   const maxTickets = Math.min(10, event.availableSeats);
   const totalPrice = event.price * tickets;

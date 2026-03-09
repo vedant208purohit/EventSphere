@@ -2,7 +2,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { Sun, Moon, Menu, X, Calendar, User, LogOut, LayoutDashboard } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { enableScrollToClose, disableScrollToClose } from '../utils/overlayManager';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -16,6 +17,35 @@ const Navbar = () => {
     navigate('/');
     setIsProfileOpen(false);
   };
+
+  // close profile if menu opens and vice-versa; coordinate with other overlays
+  useEffect(() => {
+    if (isMenuOpen || isProfileOpen) {
+      enableScrollToClose();
+    } else {
+      disableScrollToClose();
+    }
+  }, [isMenuOpen, isProfileOpen]);
+
+  useEffect(() => {
+    function handler(e: Event) {
+      const ce = e as CustomEvent;
+      const except = ce?.detail?.except;
+      // if another overlay opened and it's not this component, close menus
+      if (except && except !== 'navbar' && except !== 'profile') {
+        setIsMenuOpen(false);
+        setIsProfileOpen(false);
+      }
+      // if it's a generic close-all request with no except, also close
+      if (!except) {
+        setIsMenuOpen(false);
+        setIsProfileOpen(false);
+      }
+    }
+
+    window.addEventListener('close-all-overlays', handler as EventListener);
+    return () => window.removeEventListener('close-all-overlays', handler as EventListener);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 card-glass border-b border-surface-200/50 dark:border-surface-700/50">
@@ -60,7 +90,12 @@ const Navbar = () => {
             {user ? (
               <div className="relative">
                 <button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  onClick={() => {
+                    // close other overlays
+                    if (!isProfileOpen && typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('close-all-overlays', { detail: { except: 'profile' } }));
+                    setIsProfileOpen(!isProfileOpen);
+                    if (!isProfileOpen) setIsMenuOpen(false);
+                  }}
                   className="flex items-center gap-2 p-2 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
                 >
                   <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
@@ -111,7 +146,11 @@ const Navbar = () => {
 
             {/* Mobile menu button */}
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => {
+                if (!isMenuOpen && typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('close-all-overlays', { detail: { except: 'navbar' } }));
+                setIsMenuOpen(!isMenuOpen);
+                if (!isMenuOpen) setIsProfileOpen(false);
+              }}
               className="md:hidden p-2 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
