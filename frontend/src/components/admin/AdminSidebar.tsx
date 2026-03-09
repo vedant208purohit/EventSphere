@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Ticket, BarChart3, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Ticket, BarChart3, ArrowLeft, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const links = [
@@ -10,12 +10,23 @@ const links = [
   { to: '/admin/analytics', icon: BarChart3, label: 'Analytics', end: false },
 ];
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ onClose }: { onClose?: () => void }) => {
   return (
     <aside className="w-64 bg-white dark:bg-surface-800 border-r border-surface-200 dark:border-surface-700 min-h-screen flex flex-col">
-      <div className="p-5 border-b border-surface-200 dark:border-surface-700">
-        <h2 className="text-lg font-bold gradient-text">Admin Panel</h2>
-        <p className="text-xs text-surface-400 mt-1">Manage EventSphere</p>
+      <div className="p-5 border-b border-surface-200 dark:border-surface-700 flex items-start gap-3">
+        <div>
+          <h2 className="text-lg font-bold gradient-text">Admin Panel</h2>
+          <p className="text-xs text-surface-400 mt-1">Manage EventSphere</p>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label="Close sidebar"
+            className="ml-auto p-2 rounded-md hover:bg-surface-50 dark:hover:bg-surface-700/50 md:hidden"
+          >
+            <X className="w-4 h-4 text-surface-900 dark:text-surface-50" />
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 p-3 space-y-1">
@@ -24,6 +35,7 @@ const AdminSidebar = () => {
             key={to}
             to={to}
             end={end}
+            onClick={() => onClose && onClose()}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
@@ -41,6 +53,7 @@ const AdminSidebar = () => {
       <div className="p-3 border-t border-surface-200 dark:border-surface-700">
         <Link
           to="/"
+          onClick={() => onClose && onClose()}
           className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-surface-600 dark:text-surface-400 hover:bg-surface-50 dark:hover:bg-surface-700/50 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />

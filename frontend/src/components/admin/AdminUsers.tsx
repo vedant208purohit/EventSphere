@@ -35,7 +35,40 @@ const AdminUsers = () => {
       </div>
 
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile list */}
+        <div className="md:hidden space-y-3 p-4">
+          {users?.map((user: User) => (
+            <div key={user._id} className="flex items-center justify-between p-3 bg-surface-50 dark:bg-surface-800/40 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">{user.name.charAt(0).toUpperCase()}</span>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-surface-900 dark:text-surface-100">{user.name}</p>
+                  <p className="text-xs text-surface-400">{user.email}</p>
+                </div>
+              </div>
+              <div className="text-right flex items-center gap-2">
+                <span className={user.isBlocked ? 'badge-danger' : 'badge-success'}>{user.isBlocked ? 'Blocked' : 'Active'}</span>
+                {user.role !== 'admin' && (
+                  <button
+                    onClick={() => toggleBlockMutation.mutate(user._id)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      user.isBlocked
+                        ? 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600'
+                        : 'hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500'
+                    }`}
+                    title={user.isBlocked ? 'Unblock' : 'Block'}
+                  >
+                    {user.isBlocked ? <Shield className="w-4 h-4" /> : <ShieldOff className="w-4 h-4" />}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-surface-50 dark:bg-surface-800/50 border-b border-surface-200 dark:border-surface-700">

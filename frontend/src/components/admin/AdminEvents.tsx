@@ -108,7 +108,33 @@ const AdminEvents = () => {
 
       {/* Table */}
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile list */}
+        <div className="md:hidden p-4 space-y-3">
+          {data?.events.map((event) => (
+            <div key={event._id} className="p-3 bg-surface-50 dark:bg-surface-800/40 rounded-xl flex items-start justify-between">
+              <div className="flex items-start gap-3">
+                <img src={event.image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=100'} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                <div>
+                  <p className="text-sm font-semibold text-surface-900 dark:text-surface-100 line-clamp-1">{event.title}</p>
+                  <p className="text-xs text-surface-400">{event.category} • {formatDate(event.date)}</p>
+                  <p className="text-sm font-medium mt-1">₹{event.price.toLocaleString('en-IN')}</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <div className="flex items-center gap-2">
+                  <button onClick={() => openEdit(event)} className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 transition-colors">
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDelete(event._id)} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-surface-50 dark:bg-surface-800/50 border-b border-surface-200 dark:border-surface-700">

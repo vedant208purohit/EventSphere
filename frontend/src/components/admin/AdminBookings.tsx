@@ -46,7 +46,36 @@ const AdminBookings = () => {
       </div>
 
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile list */}
+        <div className="md:hidden p-4 space-y-3">
+          {bookings?.map((booking: Booking) => {
+            const user = booking.userId as User;
+            const event = booking.eventId as Event;
+            return (
+              <div key={booking._id} className="p-3 bg-surface-50 dark:bg-surface-800/40 rounded-xl flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-surface-900 dark:text-surface-100">{event?.title || 'N/A'}</p>
+                  <p className="text-xs text-surface-400">{user?.name || 'N/A'} • {booking.numberOfTickets} tickets</p>
+                  <p className="text-sm font-semibold mt-2">₹{booking.totalPrice.toLocaleString('en-IN')}</p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={statusColors[booking.paymentStatus]}>{booking.paymentStatus}</span>
+                  {booking.paymentStatus !== 'refunded' && booking.paymentStatus !== 'failed' && (
+                    <button
+                      onClick={() => handleCancel(booking._id)}
+                      className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors"
+                      title="Cancel Booking"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-surface-50 dark:bg-surface-800/50 border-b border-surface-200 dark:border-surface-700">
