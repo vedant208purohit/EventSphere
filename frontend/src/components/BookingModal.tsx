@@ -1,10 +1,10 @@
 import { X, Minus, Plus, Ticket } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { enableScrollToClose, disableScrollToClose } from '../utils/overlayManager';
-import { Event } from '../types';
+import type { Event as AppEvent } from '../types';
 
 interface BookingModalProps {
-  event: Event;
+  event: AppEvent;
   isOpen: boolean;
   onClose: () => void;
   onBook: (numberOfTickets: number) => void;
